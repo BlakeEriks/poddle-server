@@ -9,7 +9,7 @@ class UsersController < ApplicationController
       token = encode_token({user_id: @user.id})
       render json: {user: @user, token: token}
     else
-      render json: {error: "Invalid username or password"}
+      render status: 400, json: "error: Invalid username or password"
     end
   end
 
@@ -20,14 +20,14 @@ class UsersController < ApplicationController
       token = encode_token({user_id: @user.id})
       render json: {user: @user, token: token}
     else
-      render json: {error: "Invalid username or password"}
+      render status: 400, json: "error: Invalid username or password"
     end
   end
 
   def auto_login
     render json: @user
   end
-  
+
   private
   def user_params
     params.permit(:username, :password, :age)
