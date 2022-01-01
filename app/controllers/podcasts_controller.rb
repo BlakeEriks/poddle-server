@@ -3,7 +3,7 @@ require "podcast_api"
 class PodcastsController < ApplicationController
 
   before_action :authorized, only: [:myList, :create, :remove]
-  before_action :set_podcast, only: [:show, :remove, :destroy]
+  before_action :set_podcast, only: [:remove, :destroy]
 
   # GET /podcasts
   def index
@@ -28,13 +28,14 @@ class PodcastsController < ApplicationController
     query = params[:query]
     client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
     response = client.search(q: query, type: 'podcast')
-    puts JSON.parse(response.body)
     render json: response.body
   end
 
   # GET /podcasts/1
   def show
-    render json: @podcast
+    client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
+    response = client.fetch_podcast_by_id(id: params[:id])
+    render json: response
   end
 
   # POST /podcasts
@@ -42,7 +43,7 @@ class PodcastsController < ApplicationController
     podcast = Podcast.where(api_id: podcast_params[:api_id]).first_or_create(podcast_params)
     podcast.users << @user if not podcast.users.include? @user
     if podcast.save
-      render json: podcast, status: :created, location: podcast
+      render json: podcast, status: 200, location: podcast
     else
       render json: podcast.errors, status: :unprocessable_entity
     end
@@ -51,6 +52,7 @@ class PodcastsController < ApplicationController
   # DELETE /podcasts/my_list/:id
   def remove
     @podcast.users.delete @user
+    render json: @podcast, status: 200
   end
 
 
