@@ -1,7 +1,7 @@
 class GenresController < ApplicationController
 
-    before_action :authorized, only: [:myGenres]
-    before_action :set_genre, only: [:add]
+    before_action :authorized, only: [:myGenres, :update]
+    before_action :set_genres, only: [:update]
 
     def index
         render json: Genre.all
@@ -12,21 +12,20 @@ class GenresController < ApplicationController
         render json: @user.genres
     end
 
-    # POST /genres/my_list
-    def add
-        genre = Genre.find(params[:id])
-        genre.users << @user if not genre.users.include? @user
-        if genre.save
-            render json: genre, status: 200, location: genre
+    # PUT /genres/my_list
+    def update
+        @user.genres.clear<<@genres
+        if @user.save
+            render json: @user.genres, status: 200
         else
-            render json: genre.errors, status: :unprocessable_entity
+            render json: @user.errors, status: :unprocessable_entity
         end
     end
 
     private
     # Use callbacks to share common setup or constraints between actions.
-    def set_genre
-      @genre = Genre.find(params[:id])
+    def set_genres
+      @genres = Genre.where(id: params[:ids])
     end
 
 end
