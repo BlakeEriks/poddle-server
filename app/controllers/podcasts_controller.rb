@@ -55,7 +55,6 @@ class PodcastsController < ApplicationController
     render json: @podcast, status: 200
   end
 
-
   # PATCH/PUT /podcasts/1
   # def update
   #   if @podcast.update(podcast_params)
