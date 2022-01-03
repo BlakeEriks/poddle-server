@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_25_221335) do
+ActiveRecord::Schema.define(version: 2022_01_03_174902) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "genres", force: :cascade do |t|
+    t.string "api_id"
+    t.string "name"
+  end
+
+  create_table "genres_users", id: false, force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "genre_id", null: false
+  end
 
   create_table "podcasts", force: :cascade do |t|
     t.string "api_id"
