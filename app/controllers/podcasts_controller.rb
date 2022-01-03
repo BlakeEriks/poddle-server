@@ -10,6 +10,13 @@ class PodcastsController < ApplicationController
     render json: Podcast.all
   end
 
+  # GET /podcasts/1
+  def show
+    client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
+    response = client.fetch_podcast_by_id(id: params[:id])
+    render json: response
+  end
+
   # GET /podcasts/top
   def indexTop
     client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
@@ -17,12 +24,6 @@ class PodcastsController < ApplicationController
     render json: response
   end
   
-  # GET /podcasts/my_list
-  def myList
-    @podcasts = @user.podcasts
-    render json: @podcasts
-  end
-
   # GET /podcasts/search?query=''
   def search
     query = params[:query]
@@ -31,15 +32,14 @@ class PodcastsController < ApplicationController
     render json: response.body
   end
 
-  # GET /podcasts/1
-  def show
-    client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
-    response = client.fetch_podcast_by_id(id: params[:id])
-    render json: response
+  # GET /podcasts/my_list
+  def myList
+    @podcasts = @user.podcasts
+    render json: @podcasts
   end
 
-  # POST /podcasts
-  def create
+  # POST /podcasts/my_list
+  def add
     podcast = Podcast.where(api_id: podcast_params[:api_id]).first_or_create(podcast_params)
     podcast.users << @user if not podcast.users.include? @user
     if podcast.save
@@ -54,15 +54,6 @@ class PodcastsController < ApplicationController
     @podcast.users.delete @user
     render json: @podcast, status: 200
   end
-
-  # PATCH/PUT /podcasts/1
-  # def update
-  #   if @podcast.update(podcast_params)
-  #     render json: @podcast
-  #   else
-  #     render json: @podcast.errors, status: :unprocessable_entity
-  #   end
-  # end
 
   # DELETE /podcasts/1
   def destroy
@@ -79,4 +70,5 @@ class PodcastsController < ApplicationController
     def podcast_params
       params.require(:podcast).permit(:api_id, :title, :publisher, :image, :total_episodes, :description, :website)
     end
+    
 end
