@@ -2,8 +2,8 @@ require "podcast_api"
 
 class PodcastsController < ApplicationController
 
-  before_action :authorized, only: [:myList, :add, :remove]
-  before_action :getClient, only: [:show, :indexTop, :search]
+  before_action :authorized, only: [:myList, :add, :remove, :recommended]
+  before_action :getClient, only: [:show, :indexTop, :search, :recommended]
 
   # GET /podcasts
   def index
@@ -26,6 +26,22 @@ class PodcastsController < ApplicationController
   def search
     response = @client.search(q: params[:query], type: 'podcast')
     render json: response.body
+  end
+  
+  # GET /podcasts/recommended
+  def recommended
+    podcastLists = []
+    for genre in @user.genres
+      podcastLists.push(@client.fetch_best_podcasts(genre_id: genre.api_id, region: 'us')['podcasts'])
+    end
+    podcasts = []
+    for i in 0..podcastLists[0].length
+      for list in podcastLists
+        podcasts.push list[i]
+      end
+    end
+    render json: podcasts
+    # render json: @client.fetch_best_podcasts(genre_id: 77, region: 'us')
   end
 
   # GET /podcasts/my_list

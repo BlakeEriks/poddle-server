@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get 'podcasts/top', to: 'podcasts#indexTop'
   delete 'podcasts/my_list/:id', to: 'podcasts#remove'
   post 'podcasts/my_list', to: 'podcasts#add'
+  get 'podcasts/recommended', to: 'podcasts#recommended'
   resources :podcasts, only: [:index, :show]
 
   resource :users, only: [:create]
