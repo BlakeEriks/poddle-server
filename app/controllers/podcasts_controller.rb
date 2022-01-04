@@ -2,8 +2,8 @@ require "podcast_api"
 
 class PodcastsController < ApplicationController
 
-  before_action :authorized, only: [:myList, :create, :remove]
-  before_action :set_podcast, only: [:remove, :destroy]
+  before_action :authorized, only: [:myList, :add, :remove]
+  before_action :getClient, only: [:show, :indexTop, :search]
 
   # GET /podcasts
   def index
@@ -12,30 +12,25 @@ class PodcastsController < ApplicationController
 
   # GET /podcasts/1
   def show
-    client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
-    response = client.fetch_podcast_by_id(id: params[:id])
+    response = @client.fetch_podcast_by_id(id: params[:id])
     render json: response
   end
 
   # GET /podcasts/top
   def indexTop
-    client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
-    response = client.fetch_best_podcasts()
+    response = @client.fetch_best_podcasts()
     render json: response
   end
   
   # GET /podcasts/search?query=''
   def search
-    query = params[:query]
-    client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
-    response = client.search(q: query, type: 'podcast')
+    response = @client.search(q: params[:query], type: 'podcast')
     render json: response.body
   end
 
   # GET /podcasts/my_list
   def myList
-    @podcasts = @user.podcasts
-    render json: @podcasts
+    render json: @user.podcasts
   end
 
   # POST /podcasts/my_list
@@ -51,24 +46,19 @@ class PodcastsController < ApplicationController
 
   # DELETE /podcasts/my_list/:id
   def remove
-    @podcast.users.delete @user
-    render json: @podcast, status: 200
-  end
-
-  # DELETE /podcasts/1
-  def destroy
-    @podcast.destroy
+    podcast = Podcast.where(api_id: params[:id]).first
+    podcast.users.delete @user
+    render json: podcast, status: 200
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_podcast
-      @podcast = Podcast.find(params[:id])
-    end
-
     # Only allow a list of trusted parameters through.
     def podcast_params
       params.require(:podcast).permit(:api_id, :title, :publisher, :image, :total_episodes, :description, :website)
     end
-    
+
+    def getClient
+      @client = PodcastApi::Client.new(api_key: ENV["LISTEN_NOTES_API_KEY"])
+    end
+
 end
