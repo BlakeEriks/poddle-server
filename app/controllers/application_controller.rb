@@ -1,3 +1,6 @@
+require 'dotenv'
+Dotenv.load
+
 class ApplicationController < ActionController::API
 
     before_action :authorized
