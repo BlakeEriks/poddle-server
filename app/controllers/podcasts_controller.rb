@@ -31,7 +31,7 @@ class PodcastsController < ApplicationController
   # GET /podcasts/recommended
   def recommended
     podcastLists = []
-    if !@user.genres
+    if @user.genres.length == 0
       render json: podcastLists and return
     end
     for genre in @user.genres
