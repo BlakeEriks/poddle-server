@@ -31,6 +31,8 @@ class PodcastsController < ApplicationController
   # GET /podcasts/recommended
   def recommended
     podcastLists = []
+    if !@user.genres
+      render json: podcastLists and return
     for genre in @user.genres
       podcastLists.push(@client.fetch_best_podcasts(genre_id: genre.api_id, region: 'us')['podcasts'])
     end
@@ -41,7 +43,6 @@ class PodcastsController < ApplicationController
       end
     end
     render json: podcasts
-    # render json: @client.fetch_best_podcasts(genre_id: 77, region: 'us')
   end
 
   # GET /podcasts/my_list
